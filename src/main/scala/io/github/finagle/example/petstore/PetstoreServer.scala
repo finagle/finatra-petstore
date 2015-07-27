@@ -7,7 +7,7 @@ import com.twitter.finatra.http.exceptions.ExceptionMapper
 import com.twitter.finatra.http.filters.{ExceptionMappingFilter, CommonFilters}
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.finatra.logging.filter.{TraceIdMDCFilter, LoggingMDCFilter}
-import com.twitter.finatra.logging.modules.Slf4jBridgeModule
+import com.twitter.finatra.logging.modules.LogbackModule
 import com.twitter.inject.TwitterModule
 import com.twitter.util.Await
 
@@ -43,7 +43,7 @@ class PetstoreServer extends HttpServer {
   //END SAMPLE PETSTORE=========================================================================
 
   override def modules = Seq(
-    Slf4jBridgeModule,
+    LogbackModule,
     new TwitterModule() {
       override protected def configure(): Unit = {
 //        bind[PetstoreDb].in[Singleton]

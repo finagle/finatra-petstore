@@ -1,6 +1,0 @@
-[0m[[0minfo[0m] [0m[32mPetstoreFeatureTest:[0m[0m
-[0m[[0minfo[0m] [0m[32mPetstoreServer[0m[0m
-[0m[[0minfo[0m] [0m[32m- should Return valid pets[0m[0m
-[0m[[0minfo[0m] [0m[32m- should Fail to return invalid pets[0m[0m
-[0m[[0minfo[0m] [0m[31m- should Add valid pets *** FAILED ***[0m[0m
-[0m[[0minfo[0m] [0m[31m  400 Bad Request did not equal 200 OK (EmbeddedTwitterServer.scala:197)[0m[0m
