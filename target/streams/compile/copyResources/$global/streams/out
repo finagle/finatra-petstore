@@ -1,0 +1,3 @@
+[0m[[0mdebug[0m] [0mCopy resource mappings: [0m
+[0m[[0mdebug[0m] [0m	(/Users/michellec/Documents/finatra/examples/finatra-petstore/src/main/resources/BUILD,/Users/michellec/Documents/finatra/examples/finatra-petstore/target/scala-2.11/classes/BUILD)[0m
+[0m[[0mdebug[0m] [0m	(/Users/michellec/Documents/finatra/examples/finatra-petstore/src/main/resources/logback.xml,/Users/michellec/Documents/finatra/examples/finatra-petstore/target/scala-2.11/classes/logback.xml)[0m
