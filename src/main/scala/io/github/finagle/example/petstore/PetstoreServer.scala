@@ -6,6 +6,8 @@ import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.exceptions.ExceptionMapper
 import com.twitter.finatra.http.filters.{ExceptionMappingFilter, CommonFilters}
 import com.twitter.finatra.http.routing.HttpRouter
+import com.twitter.finatra.json.modules.FinatraJacksonModule
+import com.twitter.finatra.json.utils.CamelCasePropertyNamingStrategy
 import com.twitter.finatra.logging.filter.{TraceIdMDCFilter, LoggingMDCFilter}
 import com.twitter.finatra.logging.modules.LogbackModule
 import com.twitter.inject.TwitterModule
@@ -52,6 +54,10 @@ class PetstoreServer extends HttpServer {
       }
     }
   )
+
+  override def jacksonModule = new FinatraJacksonModule {
+    override val propertyNamingStrategy = CamelCasePropertyNamingStrategy
+  }
 
   class PetstoreError extends Exception
 
