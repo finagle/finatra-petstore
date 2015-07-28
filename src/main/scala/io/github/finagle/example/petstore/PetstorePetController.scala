@@ -88,6 +88,17 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
     petstoreDb.updatePetViaForm(id, Some(name), Some(realStat))
   }
 
+//  /**
+//   * The ID of the pet corresponding to the image is passed in the path, whereas the image
+//   * file is passed as form data.
+//   * @return A Router that contains a RequestReader of the uploaded image's url.
+//   */
+//  post("/pet/:id/uploadImage") { request: Request =>
+//    fileUpload("file").embedFlatMap { upload =>
+//      petstoreDb.addImage(request.params.getLongOrElse("id", throw MissingIdentifier("Must give an ID")), upload.get())
+//    }
+//  }
+
 
 //
 //  post("/hi") { hiRequest: HiRequest =>
