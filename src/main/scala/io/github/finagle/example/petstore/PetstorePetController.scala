@@ -83,7 +83,12 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
     val id: Long = request.params.getLongOrElse("id", throw MissingIdentifier("Must give an ID"))
     val name: String = request.params.getOrElse("name", throw InvalidInput("Must give a name"))
     val status: String = request.params.getOrElse("status", throw InvalidInput("Must give a status"))
-    val realStat: Status = Status.valueOf(status)
+    val realStat: Status = status match {
+      case "available" => Status.Available
+      case "pending" => Status.Pending
+      case "adopted" => Status.Adopted
+      case other => throw InvalidInput(s"$other is not a valid status")
+    }
     petstoreDb.updatePetViaForm(id, Some(name), Some(realStat))
   }
 

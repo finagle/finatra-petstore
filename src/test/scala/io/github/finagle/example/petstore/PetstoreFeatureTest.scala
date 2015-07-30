@@ -131,7 +131,7 @@ class PetstoreFeatureTest extends FeatureTest {
     //updatePetViaForm
     "Allow the updating of pets via form data" in {
       server.httpFormPost(
-        path = "/pet/0",
+        path = "/pet/1",
         params = Map("name" -> "Higgins", "status" -> "pending"),
         andExpect = Ok
       )
