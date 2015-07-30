@@ -63,6 +63,7 @@ class PetstoreFeatureTest extends FeatureTest {
     "Update valid pets" in {
       server.httpPut(
         path = "/pet",
+        headers = Map("content-type" -> "application/json"),
         putBody =
           """
             |{
@@ -81,6 +82,7 @@ class PetstoreFeatureTest extends FeatureTest {
     "Fail attempts to update pets without specifying an ID" in {
       server.httpPut(
         path = "/pet",
+        headers = Map("content-type" -> "application/json"),
         putBody =
           """
             |{
@@ -106,7 +108,7 @@ class PetstoreFeatureTest extends FeatureTest {
     //getPetsByTag
     "Successfully find pets by tag" in {
       server.httpGet(
-        path = "pet/findByTags?tags=puppy%2C%20white",
+        path = "/pet/findByTags?tags=puppy%2C%20white",
         andExpect = Ok
       )
     }

@@ -9,15 +9,34 @@ import com.twitter.util.Future
 class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller {
 
   /**
+   * Endpoint for getPetsByStatus
+   * The status(es) are passed as one query parameter.
+   * @return A Router that contains a RequestReader of the sequence of all Pets with the Status in question.
+   */
+  get("/pet/findByStatus") { findStati: SeekStatus =>
+    if (findStati.status.length > 0) petstoreDb.getPetsByStatus(findStati.status.split(",").map(_.trim))
+    else throw InvalidInput("You must enter one or more Statuses!")
+  }
+
+  /**
+   * Endpoint for findPetsByTag
+   * The tags are passed as query parameters.
+   * @return A Router that contains a RequestReader of the sequence of all Pets with the given Tags.
+   */
+  get("/pet/findByTags") { allTags: SeekTags =>
+    if (allTags.tags.length > 0) petstoreDb.findPetsByTag(allTags.tags.split(",").map(_.trim))
+    else throw InvalidInput("You must enter one or more Tags!")
+  }
+
+  /**
    * Endpoint for getPet
    * The long passed in the path becomes the ID of the Pet fetched.
    * @return A Router that contains the Pet fetched.
    */
-  get("/pet/:id") { request: Request =>
-    request.params.getLong("id") match {
-      case Some(id) => petstoreDb.getPet(id)
+  get("/pet/:id") { request: Id =>
+    request.id match {
+      case Some(num) => petstoreDb.getPet(num)
       case None => throw MissingIdentifier("You must enter the id of a pet to find it!")
-//      case None => Future.exception(new Exception)
     }
   }
 
@@ -44,26 +63,6 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
   }
 
   /**
-   * Endpoint for getPetsByStatus
-   * The status(es) are passed as one query parameter.
-   * @return A Router that contains a RequestReader of the sequence of all Pets with the Status in question.
-   */
-  get("/pet/findByStatus") { stati: Seq[String] =>
-    if (!stati.isEmpty) petstoreDb.getPetsByStatus(stati)
-    else throw InvalidInput("You must enter one or more Statuses!")
-  }
-
-  /**
-   * Endpoint for findPetsByTag
-   * The tags are passed as query parameters.
-   * @return A Router that contains a RequestReader of the sequence of all Pets with the given Tags.
-   */
-  get("/pet/findByTags") { tags: Seq[String] =>
-    if (!tags.isEmpty) petstoreDb.findPetsByTag(tags)
-    else throw InvalidInput("You must enter one or more Tags!")
-  }
-
-  /**
    * Endpoint for deletePet
    * The ID of the pet to delete is passed in the path.
    * @return A Router that contains a RequestReader of the deletePet result (true for success, false otherwise).
@@ -87,17 +86,6 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
     val realStat: Status = Status.valueOf(status)
     petstoreDb.updatePetViaForm(id, Some(name), Some(realStat))
   }
-
-//  /**
-//   * The ID of the pet corresponding to the image is passed in the path, whereas the image
-//   * file is passed as form data.
-//   * @return A Router that contains a RequestReader of the uploaded image's url.
-//   */
-//  post("/pet/:id/uploadImage") { request: Request =>
-//    fileUpload("file").embedFlatMap { upload =>
-//      petstoreDb.addImage(request.params.getLongOrElse("id", throw MissingIdentifier("Must give an ID")), upload.get())
-//    }
-//  }
 
 
 //
