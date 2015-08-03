@@ -31,6 +31,11 @@ class PetstoreServer extends HttpServer {
   val cheshire = Pet(None, "Cheshire Cat", Nil, Some(Category(None, "cat")), Some(Nil), Some(Status.Available))
   val crookshanks = Pet(None, "Crookshanks", Nil, Some(Category(None, "cat")), Some(Nil), Some(Status.Available))
   val coraline: User = User(None, "coraline", Some("Coraline"), Some("Jones"), None, "becarefulwhatyouwishfor", None)
+  val kagura: User = User(None, "kagura", Some("kagura"), Some("yato"), None, "sukonbu", None)
+  val catOrder: Order = Order(None, Some(8), Some(3), Some("2015-8-2"), Some(OrderStatus.Placed), None)
+
+
+
   Await.ready(db.addPet(rover))
   Await.ready(db.addPet(jack))
   Await.ready(db.addPet(sue))
@@ -41,6 +46,8 @@ class PetstoreServer extends HttpServer {
   Await.ready(db.addPet(cheshire))
   Await.ready(db.addPet(crookshanks))
   Await.ready(db.addUser(coraline))
+  Await.ready(db.addUser(kagura))
+  Await.ready(db.addOrder(catOrder))
 
   //END SAMPLE PETSTORE=========================================================================
 
@@ -68,5 +75,7 @@ class PetstoreServer extends HttpServer {
       .filter[CommonFilters]
       .exceptionMapper[PetstoreErrorMapper]
       .add[PetstorePetController]
+      .add[PetstoreStoreController]
+      .add[PetstoreUserController]
   }
 }

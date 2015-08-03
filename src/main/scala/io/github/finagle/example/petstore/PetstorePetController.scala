@@ -3,6 +3,8 @@ package io.github.finagle.example.petstore
 import javax.inject.Inject
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
+import com.twitter.finatra.http.fileupload.MultipartItem
+import com.twitter.finatra.http.request.RequestUtils
 import com.twitter.util.Future
 
 // Guice
@@ -50,6 +52,36 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
   }
 
   /**
+   * Endpoint for the updatePetViaForm (form data) service method.
+   * The pet's ID is passed in the path.
+   * @return A Router that contains a RequestReader of the Pet that was updated.
+   */
+  post("/pet/:id") { request: Request =>
+    val id: Long = request.params.getLongOrElse("id", throw MissingIdentifier("Must give an ID"))
+    val name: String = request.params.getOrElse("name", throw InvalidInput("Must give a name"))
+    val status: String = request.params.getOrElse("status", throw InvalidInput("Must give a status"))
+    val realStat: Status = status match {
+      case "available" => Status.Available
+      case "pending" => Status.Pending
+      case "adopted" => Status.Adopted
+      case other => throw InvalidInput(s"$other is not a valid status")
+    }
+    petstoreDb.updatePetNameStatus(id, Some(name), Some(realStat))
+  }
+
+  /**
+   * The ID of the pet corresponding to the image is passed in the path, whereas the image
+   * file is passed as form data.
+   * @return A Router that contains a RequestReader of the uploaded image's url.
+   */
+  post("/pet/:id/uploadImage") { request: Request =>
+    val id: Long = request.params.getLongOrElse("id", throw MissingIdentifier("Must give an ID"))
+    val imageItem: MultipartItem = RequestUtils.multiParams(request).getOrElse("file",
+      throw InvalidInput("Must upload an image!"))
+    petstoreDb.addImage(id, imageItem.data)
+  }
+
+  /**
    * Endpoint for updatePet
    * The updated, better version of the current pet must be passed in the body.
    * @return A Router that contains a RequestReader of the updated Pet.
@@ -73,28 +105,4 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
       case None => throw MissingIdentifier("You must enter the id of the pet to be deleted!")
     }
   }
-
-  /**
-   * Endpoint for the updatePetViaForm (form data) service method.
-   * The pet's ID is passed in the path.
-   * @return A Router that contains a RequestReader of the Pet that was updated.
-   */
-  post("/pet/:id") { request: Request =>
-    val id: Long = request.params.getLongOrElse("id", throw MissingIdentifier("Must give an ID"))
-    val name: String = request.params.getOrElse("name", throw InvalidInput("Must give a name"))
-    val status: String = request.params.getOrElse("status", throw InvalidInput("Must give a status"))
-    val realStat: Status = status match {
-      case "available" => Status.Available
-      case "pending" => Status.Pending
-      case "adopted" => Status.Adopted
-      case other => throw InvalidInput(s"$other is not a valid status")
-    }
-    petstoreDb.updatePetViaForm(id, Some(name), Some(realStat))
-  }
-
-
-//
-//  post("/hi") { hiRequest: HiRequest =>
-//    "Hello " + hiRequest.name + " with id " + hiRequest.id
-//  }
 }
