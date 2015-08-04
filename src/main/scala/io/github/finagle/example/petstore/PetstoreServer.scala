@@ -17,8 +17,6 @@ object PetstoreServerMain extends PetstoreServer
 
 class PetstoreServer extends HttpServer {
 
-  //BEGIN SAMPLE PETSTORE=========================================================================
-
   val db = new PetstoreDb()
   val rover = Pet(None, "Rover", Nil, Some(Category(None, "dog")), Some(Seq(Tag(None, "puppy"), Tag(None, "white"))),
     Some(Status.Available))
@@ -34,8 +32,6 @@ class PetstoreServer extends HttpServer {
   val kagura: User = User(None, "kagura", Some("kagura"), Some("yato"), None, "sukonbu", None)
   val catOrder: Order = Order(None, Some(8), Some(3), Some("2015-8-2"), Some(OrderStatus.Placed), None)
 
-
-
   Await.ready(db.addPet(rover))
   Await.ready(db.addPet(jack))
   Await.ready(db.addPet(sue))
@@ -49,15 +45,11 @@ class PetstoreServer extends HttpServer {
   Await.ready(db.addUser(kagura))
   Await.ready(db.addOrder(catOrder))
 
-  //END SAMPLE PETSTORE=========================================================================
-
   override def modules = Seq(
     LogbackModule,
     new TwitterModule() {
       override protected def configure(): Unit = {
-//        bind[PetstoreDb].in[Singleton]
-        bind[PetstoreDb].toInstance(db) //comment out and switch with above when done
-//        bind[PetstoreDb].in[Singleton]  //comment out and switch with above when done
+        bind[PetstoreDb].in[Singleton]
       }
     }
   )

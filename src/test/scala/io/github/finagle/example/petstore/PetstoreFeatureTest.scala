@@ -1,12 +1,11 @@
 package io.github.finagle.example.petstore
 
 import com.twitter.finagle.http.Status._
-import com.twitter.finagle.http.{RequestBuilder, Request, FileElement}
+import com.twitter.finagle.http.{FileElement, Request, RequestBuilder}
 import com.twitter.finatra.http.test.EmbeddedHttpServer
 import com.twitter.inject.server.FeatureTest
 import com.twitter.io.{Reader, Buf}
 import com.twitter.util.Await
-import org.apache.commons.fileupload.util.FileItemHeadersImpl
 import org.apache.commons.io.IOUtils
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpRequest
@@ -23,6 +22,7 @@ class PetstoreFeatureTest extends FeatureTest {
         andExpect = Ok
       )
     }
+
     "Fail to return invalid pets" in {
       server.httpGet(
         path = "/pet/100",
@@ -112,11 +112,25 @@ class PetstoreFeatureTest extends FeatureTest {
       )
     }
 
+    "Fail if no valid statuses are given to findByStatus endpoint" in {
+      server.httpGet(
+        path = "/pet/findByStatus?status=",
+        andExpect = NotFound
+      )
+    }
+
     //getPetsByTag
     "Successfully find pets by tag" in {
       server.httpGet(
         path = "/pet/findByTags?tags=puppy%2C%20white",
         andExpect = Ok
+      )
+    }
+
+    "Fail if no tags are given to findbyTags endpoint" in {
+      server.httpGet(
+        path = "/pet/findByTags?tags=",
+        andExpect = NotFound
       )
     }
 
@@ -139,8 +153,26 @@ class PetstoreFeatureTest extends FeatureTest {
     "Allow the updating of pets via form data" in {
       server.httpFormPost(
         path = "/pet/1",
+        params = Map("name" -> "Higgins", "status" -> "available"),
+        andExpect = Ok
+      )
+      server.httpFormPost(
+        path = "/pet/1",
         params = Map("name" -> "Higgins", "status" -> "pending"),
         andExpect = Ok
+      )
+      server.httpFormPost(
+        path = "/pet/1",
+        params = Map("name" -> "Higgins", "status" -> "adopted"),
+        andExpect = Ok
+      )
+    }
+
+    "Fail appropriately if an invalid status is given when updating a pet via form data" in {
+      server.httpFormPost(
+        path = "/pet/1",
+        params = Map("name" -> "Higgins", "status" -> "hungry"),
+        andExpect = NotFound
       )
     }
 
@@ -148,7 +180,6 @@ class PetstoreFeatureTest extends FeatureTest {
     "Allow the uploading of images for pets" in {
       val imageDataStream = getClass.getResourceAsStream("/bear.jpg")
       val imageByte = IOUtils.toByteArray(imageDataStream)
-      //                   Buf          Future[Buf]    Reader            InputStream
       val imageData: Buf = Await.result(Reader.readAll(Reader.fromStream(imageDataStream)))
       val req: HttpRequest = RequestBuilder()
         .url("http://localhost:8888/pet/1/uploadImage")
@@ -215,6 +246,17 @@ class PetstoreFeatureTest extends FeatureTest {
       )
     }
 
+    "Fail appropriately when no order is passed in addOrder" in {
+      server.httpPost(
+        path = "/store/order",
+        postBody =
+            """
+              |{}
+            """.stripMargin,
+        andExpect = NotFound
+      )
+    }
+
     //deleteOrder
     "Allow for the deletion of store orders" in {
       server.httpDelete(
@@ -263,21 +305,22 @@ class PetstoreFeatureTest extends FeatureTest {
       )
     }
 
-//    "Fail when adding invalid users" in {
-//      server.httpPost(
-//        path = "/user",
-//        postBody =
-//            """
-//              |{
-//              |  "username": "ichigoMilk",
-//              |  "firstName": "gintoki",
-//              |  "lastName": "sakata",
-//              |  "email": "yorozuyagc@kabukicho.com"
-//              |}
-//            """.stripMargin,
-//        andExpect = NotFound
-//      )
-//    }
+    "Fail when adding users with redundant usernames" in {
+      server.httpPost(
+        path = "/user",
+        postBody =
+            """
+              |{
+              |  "username": "ichigoMilk",
+              |  "firstName": "gintoki",
+              |  "lastName": "sakata",
+              |  "email": "yorozuyagc@kabukicho.com",
+              |  "password": "dango"
+              |}
+            """.stripMargin,
+        andExpect = NotFound
+      )
+    }
 
     //getUser
     "Allow for the retrieval of existing users" in {
@@ -313,6 +356,41 @@ class PetstoreFeatureTest extends FeatureTest {
       )
     }
 
+    "Fail appropriately if a username is not given in the path when updating a user" in {
+      server.httpPut(
+        path = "/user",
+        headers = Map("content-type" -> "application/json"),
+        putBody =
+            """
+              |{
+              |  "username": "kagura",
+              |  "firstName": "gintoki",
+              |  "lastName": "sakata",
+              |  "email": "yorozuyagc@kabukicho.com",
+              |  "password": "dango"
+              |}
+            """.stripMargin,
+        andExpect = NotFound
+      )
+    }
+
+    "Fail appropriately if information for a user to be updated is given incorrectly" in {
+      server.httpPut(
+        path = "/user",
+        headers = Map("content-type" -> "application/json"),
+        putBody =
+            """
+              |{
+              |  "username": "kagura",
+              |  "firstName": "gintoki",
+              |  "lastName": "sakata",
+              |  "email": "yorozuyagc@kabukicho.com"
+              |}
+            """.stripMargin,
+        andExpect = NotFound
+      )
+    }
+
     //deleteUser
     "Allow for the deletion of existing users" in {
       server.httpDelete(
@@ -328,7 +406,7 @@ class PetstoreFeatureTest extends FeatureTest {
       )
     }
 
-    //addUser
+    //addUserViaArray
     "Allow the adding of an array of users" in {
       server.httpPost(
         path = "/user/createWithArray",
@@ -348,6 +426,18 @@ class PetstoreFeatureTest extends FeatureTest {
       )
     }
 
+    "Do nothing when given an empty array of users" in {
+      server.httpPost(
+        path = "/user/createWithArray",
+        postBody =
+            """
+              |[]
+            """.stripMargin,
+        andExpect = Ok
+      )
+    }
+
+    //addUserViaList
     "Allow the adding of a list of users" in {
       server.httpPost(
         path = "/user/createWithList",

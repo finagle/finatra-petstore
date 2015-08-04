@@ -2,102 +2,64 @@ package io.github.finagle.example.petstore
 
 import javax.inject.Inject
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 
-class PetstoreUserController @Inject()(petstoreDb: PetstoreDb, mapper: ObjectMapper) extends Controller {
+/**
+ * A controller that invokes all the user service methods of the Petstore API. Supported routes include:
+ *
+ * GET: /user/:username (getUser)
+ *    The username of the User to be found is passed in the path.
+ *
+ * POST: /user (addUser)
+ *    The information of the added User is passed in the body.
+ *
+ * POST: /user/createWithList (addUser for every user in the list)
+ *    The list of Users is passed in the body.
+ *
+ * POST: /user/createWithArray (addUser for every user in the array)
+ *    The array of users is passed in the body.
+ *
+ * PUT: /user/:user (updateUser)
+ *    The username of the User to be updated is passed in the path.
+ *    The information with which to replace the old user with is passed in the body.
+ *
+ * DELETE: /user/:username (deleteUser)
+ *    The username of the User to be deleted is passed in the path.
+ *
+ * @param petstoreDb The petstore instance on which to perform the methods.
+ */
+class PetstoreUserController @Inject()(petstoreDb: PetstoreDb) extends Controller {
 
-  /**
-   * Endpoint for addUser
-   * The information of the added User is passed in the body.
-   * @return A Router that contains a RequestReader of the username of the added User.
-   */
+  get("/user/:username") { request: Request =>
+    petstoreDb.getUser(request.params("username"))
+  }
+
   post("/user") { u: User =>
     petstoreDb.addUser(u)
   }
 
-  /**
-   * Endpoint for addUsersViaList
-   * The list of Users is passed in the body.
-   * @return A Router that contains a RequestReader of a sequence of the usernames of the Users added.
-   */
   post("/user/createWithList") { info: Seq[User] =>
-//    info: UsersFromSeq =>
-//      info.users.map(petstoreDb.addUser)
     info.map(petstoreDb.addUser)
   }
 
-  /**
-   * Endpoint for addUsersViaArray
-   * The array of users is passed in the body.
-   * @return A Router that contains a RequestReader of a sequence of the usernames of the Users added.
-   */
   post("/user/createWithArray") { info: Seq[User] =>
     info.map(petstoreDb.addUser)
-//    info: UsersFromSeq =>
-//    if (!info.users.isEmpty) info.users.map(petstoreDb.addUser)
-//    else throw InvalidInput("You must enter an array of users!")
   }
 
-  /**
-   * Endpoint for deleteUser
-   * The username of the User to be deleted is passed in the path.
-   * @return A Router that contains essentially nothing unless an error is thrown.
-   */
+  put("/user/:user") {info: UpdateUser =>
+    print(info.user)
+    petstoreDb.updateUser(
+      User(info.id,
+        info.username,
+        info.firstName,
+        info.lastName,
+        info.email,
+        info.password,
+        info.phone))
+  }
+
   delete("/user/:username") { request: Request =>
-    request.params.get("username") match {
-      case Some(u) => petstoreDb.deleteUser(u)
-      case None => throw InvalidInput("Must give the username of the user to be deleted!")
-    }
-  }
-
-  /**
-   * Endpoint for getUser
-   * The username of the User to be found is passed in the path.
-   * @return A Router that contains the User in question.
-   */
-  get("/user/:username") { request: Request =>
-    request.params.get("username") match {
-      case Some(u) => petstoreDb.getUser(u)
-      case None => throw InvalidInput("Must give the username of the user to be found!")
-    }
-  }
-
-  /**
-   * Endpoint for updateUser
-   * The username of the User to be updated is passed in the path.
-   * The information with which to replace the old user with is passed in the body.
-   * @return A Router that contains a RequestReader of the User updated.
-   */
-   put("/user/:user") {info: UpdateUser =>
-
-    //ADD ERROR CHECKING
-
-     petstoreDb.updateUser(
-       User(info.id,
-         info.username,
-         info.firstName,
-         info.lastName,
-         info.email,
-         info.password,
-         info.phone))
-
-//     petstoreDb.updateUser(info.betterUser.getOrElse(
-//       throw InvalidInput("Must pass information to update the user with!")))
-
-
-
-
-
-
-
-
-//
-//     info.username match {
-//      case u: String => petstoreDb.updateUser(info.betterUser.getOrElse(
-//        throw InvalidInput("Must pass information to update the user with!")))
-//      case _ => throw InvalidInput("Must give the username of the user to be updated!")
-//     }
+    petstoreDb.deleteUser(request.params("username"))
   }
 }
