@@ -10,4 +10,7 @@ case class SeekTags( @QueryParam tags: String )
 
 case class UsersFromSeq( users: Seq[User])
 
-case class UpdateUserInfo( @RouteParam username: Option[String], betterUser: Option[User])
+case class UpdateUserInfo(
+    @RouteParam username: String,
+    betterUser: Option[User])
+
