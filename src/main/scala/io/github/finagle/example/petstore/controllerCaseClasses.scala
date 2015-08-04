@@ -14,3 +14,14 @@ case class UpdateUserInfo(
     @RouteParam username: String,
     betterUser: Option[User])
 
+case class UpdateUser(
+    @RouteParam user: String,
+    id: Option[Long],
+    username: String,
+    firstName: Option[String],
+    lastName: Option[String],
+    email: Option[String],
+    password: String,
+    phone: Option[String]
+    )
+

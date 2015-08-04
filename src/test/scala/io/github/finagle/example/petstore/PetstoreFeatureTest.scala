@@ -301,14 +301,12 @@ class PetstoreFeatureTest extends FeatureTest {
         headers = Map("content-type" -> "application/json"),
         putBody =
             """
-              |{"betterUser":
-              |  {
+              |{
               |  "username": "kagura",
               |  "firstName": "gintoki",
               |  "lastName": "sakata",
               |  "email": "yorozuyagc@kabukicho.com",
               |  "password": "dango"
-              |  }
               |}
             """.stripMargin,
         andExpect = Ok
@@ -336,17 +334,15 @@ class PetstoreFeatureTest extends FeatureTest {
         path = "/user/createWithArray",
         postBody =
             """
-              |{ "users":
-              |  [
-              |    {
-              |      "username": "shiroyasha",
-              |      "firstName": "gintoki",
-              |      "lastName": "sakata",
-              |      "email": "yorozuyagc@kabukicho.com",
-              |      "password": "dango"
-              |    }
-              |  ]
-              |}
+              |[
+              |  {
+              |    "username": "shiroyasha",
+              |    "firstName": "gintoki",
+              |    "lastName": "sakata",
+              |    "email": "yorozuyagc@kabukicho.com",
+              |    "password": "dango"
+              |  }
+              |]
             """.stripMargin,
         andExpect = Ok
       )
@@ -357,17 +353,15 @@ class PetstoreFeatureTest extends FeatureTest {
         path = "/user/createWithList",
         postBody =
             """
-              |{ "users":
-              |  [
-              |    {
-              |      "username": "danna",
-              |      "firstName": "gintoki",
-              |      "lastName": "sakata",
-              |      "email": "yorozuyagc@kabukicho.com",
-              |      "password": "dango"
-              |    }
-              |  ]
-              |}
+              |[
+              |  {
+              |    "username": "danna",
+              |    "firstName": "gintoki",
+              |    "lastName": "sakata",
+              |    "email": "yorozuyagc@kabukicho.com",
+              |    "password": "dango"
+              |  }
+              |]
             """.stripMargin,
         andExpect = Ok
       )

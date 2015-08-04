@@ -22,11 +22,10 @@ class PetstoreUserController @Inject()(petstoreDb: PetstoreDb, mapper: ObjectMap
    * The list of Users is passed in the body.
    * @return A Router that contains a RequestReader of a sequence of the usernames of the Users added.
    */
-  post("/user/createWithList") { info: UsersFromSeq =>
-//    val users: Seq[User] = mapper.readValue(request.contentString, classOf[Seq[User]])
-      info.users.map(petstoreDb.addUser)
-//    if (!info.users.isEmpty) info.users.map(petstoreDb.addUser)
-//    else throw InvalidInput("You must enter a list of users!")
+  post("/user/createWithList") { info: Seq[User] =>
+//    info: UsersFromSeq =>
+//      info.users.map(petstoreDb.addUser)
+    info.map(petstoreDb.addUser)
   }
 
   /**
@@ -34,9 +33,11 @@ class PetstoreUserController @Inject()(petstoreDb: PetstoreDb, mapper: ObjectMap
    * The array of users is passed in the body.
    * @return A Router that contains a RequestReader of a sequence of the usernames of the Users added.
    */
-  post("/user/createWithArray") { info: UsersFromSeq =>
-    if (!info.users.isEmpty) info.users.map(petstoreDb.addUser)
-    else throw InvalidInput("You must enter an array of users!")
+  post("/user/createWithArray") { info: Seq[User] =>
+    info.map(petstoreDb.addUser)
+//    info: UsersFromSeq =>
+//    if (!info.users.isEmpty) info.users.map(petstoreDb.addUser)
+//    else throw InvalidInput("You must enter an array of users!")
   }
 
   /**
@@ -69,17 +70,29 @@ class PetstoreUserController @Inject()(petstoreDb: PetstoreDb, mapper: ObjectMap
    * The information with which to replace the old user with is passed in the body.
    * @return A Router that contains a RequestReader of the User updated.
    */
-   put("/user/:username") {info: UpdateUserInfo =>
-//     request: Request =>
-//     info: UpdateUserInfo =>
-//     val name = request.params.get("username")
-//     val string = request.contentString
-//
-//     val betterUser: User = mapper.readValue(string, classOf[User])
-//     petstoreDb.updateUser(betterUser)
+   put("/user/:user") {info: UpdateUser =>
 
-     petstoreDb.updateUser(info.betterUser.getOrElse(
-       throw InvalidInput("Must pass information to update the user with!")))
+    //ADD ERROR CHECKING
+
+     petstoreDb.updateUser(
+       User(info.id,
+         info.username,
+         info.firstName,
+         info.lastName,
+         info.email,
+         info.password,
+         info.phone))
+
+//     petstoreDb.updateUser(info.betterUser.getOrElse(
+//       throw InvalidInput("Must pass information to update the user with!")))
+
+
+
+
+
+
+
+
 //
 //     info.username match {
 //      case u: String => petstoreDb.updateUser(info.betterUser.getOrElse(
