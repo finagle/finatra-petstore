@@ -6,6 +6,19 @@ lazy val finagleVersion = "6.25.0"
 
 resolvers += "twitter-repo" at "https://maven.twttr.com"
 
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-unchecked",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Xfuture"
+)
+
 libraryDependencies ++= Seq(
   "com.twitter.finatra" %% "finatra-http" % finatraVersion,
   "com.twitter.finatra" %% "finatra-http" % finatraVersion % "test" classifier "tests",
