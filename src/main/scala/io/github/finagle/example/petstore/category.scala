@@ -6,5 +6,3 @@ package io.github.finagle.example.petstore
  * @param name The name of this Category.
  */
 case class Category(id: Option[Long], name: String)
-
-object Category{}

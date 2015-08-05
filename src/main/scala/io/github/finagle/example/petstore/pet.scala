@@ -18,9 +18,3 @@ case class Pet(
     tags: Option[Seq[Tag]],
     status: Option[Status] //available, pending, adopted
     )
-
-/**
- * Provides a codec for decoding and encoding Pet objects.
- */
-object Pet {
-}

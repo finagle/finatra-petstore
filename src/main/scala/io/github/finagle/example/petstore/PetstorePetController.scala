@@ -3,37 +3,77 @@ package io.github.finagle.example.petstore
 import javax.inject.Inject
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import com.twitter.util.Future
+import com.twitter.finatra.http.fileupload.MultipartItem
+import com.twitter.finatra.http.request.RequestUtils
 
-// Guice
+/**
+ * A controller that invokes all the pet service methods of the Petstore API. Supported routes include:
+ *
+ * GET: /pet/findByStatus (getPetsByStatus)
+ *    Status(es) are passed as one query parameter.
+ *
+ * GET: /pet/findByTags (findPetsByTag)
+ *    The tags are passed as query parameters.
+ *
+ * GET: /pet/:id (getPet)
+ *    The long passed in the path becomes the ID of the Pet fetched.
+ *
+ * POST: /pet/:id (updatePetNameStatus)
+ *    The pet's ID is passed in the path. Its new name and status are passed as form data.
+ *
+ * POST: /pet (addPet)
+ *    The pet to be added must be passed in the body.
+ *
+ * POST: /pet/:id/uploadImage (addImage)
+ *    The ID of the pet corresponding to the image is passed in the path, whereas the image
+ *    file is passed as form data.
+ *
+ * PUT: /pet (updatePet)
+ *    The updated, better version of the current pet must be passed in the body.
+ *
+ * DELETE: /pet/:id (deletePet)
+ *    The ID of the pet to delete is passed in the path.
+ *
+ * @param petstoreDb The petstore instance on which to perform the methods.
+ */
 class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller {
 
-  /**
-   * Endpoint for getPet
-   * The long passed in the path becomes the ID of the Pet fetched.
-   * @return A Router that contains the Pet fetched.
-   */
-  get("/pet/:id") { request: Request =>
-    request.params.getLong("id") match {
-      case Some(id) => petstoreDb.getPet(id)
-      case None => Future.exception(new Exception)
-    }
+  get("/pet/findByStatus") { findStati: SeekStatus =>
+    if (findStati.status.length > 0) petstoreDb.getPetsByStatus(findStati.status.split(",").map(_.trim))
+    else throw InvalidInput("You must enter one or more Statuses!")
   }
 
-  /**
-   * Endpoint for addPet
-   * The pet to be added must be passed in the body.
-   * @return A Router that contains a RequestReader of the ID of the Pet added.
-   */
+  get("/pet/findByTags") { allTags: SeekTags =>
+    if (allTags.tags.length > 0) petstoreDb.findPetsByTag(allTags.tags.split(",").map(_.trim))
+    else throw InvalidInput("You must enter one or more Tags!")
+  }
+
+  get("/pet/:id") { request: Id =>
+    petstoreDb.getPet(request.id)
+  }
+
+  post("/pet/:id") { request: FormPostRequest =>
+    val status: String = request.status
+    val realStat: Status = status match {
+      case "available" => Status.Available
+      case "pending" => Status.Pending
+      case "adopted" => Status.Adopted
+      case other => throw InvalidInput(s"$other is not a valid status")
+    }
+    petstoreDb.updatePetNameStatus(request.id, Some(request.name), Some(realStat))
+  }
+
   post("/pet") { pet: Pet =>
     petstoreDb.addPet(pet)
   }
 
-  /**
-   * Endpoint for updatePet
-   * The updated, better version of the current pet must be passed in the body.
-   * @return A Router that contains a RequestReader of the updated Pet.
-   */
+  post("/pet/:id/uploadImage") { request: Request =>
+    val id: Long = request.params.getLongOrElse("id", throw InvalidInput("Must give ID of pet to upload image to!"))
+    val imageItem: MultipartItem = RequestUtils.multiParams(request)
+        .getOrElse("file", throw InvalidInput("Must pass in an image!"))
+    petstoreDb.addImage(id, imageItem.data)
+  }
+
   put("/pet") { pet: Pet =>
     val identifier: Long = pet.id match {
       case Some(num) => num
@@ -42,18 +82,7 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
     petstoreDb.updatePet(pet.copy(id = Some(identifier)))
   }
 
-//  /**
-//   * Endpoint for getPetsByStatus
-//   * The status is passed as a query parameter.
-//   * @return A Router that contains a RequestReader of the sequence of all Pets with the Status in question.
-//   */
-//    get("/pet/findByStatus") {
-//
-//    }
-
-
-//
-//  post("/hi") { hiRequest: HiRequest =>
-//    "Hello " + hiRequest.name + " with id " + hiRequest.id
-//  }
+  delete("/pet/:id") { request: Id =>
+    petstoreDb.deletePet(request.id)
+  }
 }

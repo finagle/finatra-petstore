@@ -17,5 +17,3 @@ case class Order(
     status: Option[OrderStatus], //placed, approved, delivered
     complete: Option[Boolean]
     )
-
-//object Order{}
