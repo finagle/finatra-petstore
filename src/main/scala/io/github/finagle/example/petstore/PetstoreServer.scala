@@ -3,8 +3,7 @@ package io.github.finagle.example.petstore
 import com.google.inject.Singleton
 import com.twitter.finagle.http.{Response, Request}
 import com.twitter.finatra.http.HttpServer
-import com.twitter.finatra.http.exceptions.ExceptionMapper
-import com.twitter.finatra.http.filters.{ExceptionMappingFilter, CommonFilters}
+import com.twitter.finatra.http.filters.{CommonFilters}
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.finatra.json.modules.FinatraJacksonModule
 import com.twitter.finatra.json.utils.CamelCasePropertyNamingStrategy

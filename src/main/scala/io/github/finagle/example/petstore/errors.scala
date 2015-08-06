@@ -2,11 +2,9 @@ package io.github.finagle.example.petstore
 
 import javax.inject.Inject
 
-import com.twitter.finagle.{SimpleFilter, Service}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finatra.http.exceptions.ExceptionMapper
 import com.twitter.finatra.http.response.ResponseBuilder
-import com.twitter.util.Future
 
 /**
 * The parent error from which most PetstoreAPI errors extend. Thrown whenever something in the api goes wrong.

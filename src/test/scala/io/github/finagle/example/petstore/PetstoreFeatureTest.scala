@@ -1,7 +1,7 @@
 package io.github.finagle.example.petstore
 
 import com.twitter.finagle.http.Status._
-import com.twitter.finagle.http.{FileElement, Request, RequestBuilder}
+import com.twitter.finagle.http.{Method, FileElement, Request, RequestBuilder}
 import com.twitter.finatra.http.test.EmbeddedHttpServer
 import com.twitter.inject.server.FeatureTest
 import com.twitter.io.{Reader, Buf}
@@ -137,7 +137,7 @@ class PetstoreFeatureTest extends FeatureTest {
     //deletePet
     "Successfully delete existing pets" in {
       server.httpDelete(
-        path = "/pet/0",
+        path = "/pet/7",
         andExpect = Ok
       )
     }
@@ -201,6 +201,32 @@ class PetstoreFeatureTest extends FeatureTest {
       server.httpRequest(
         request = Request(req2),
         andExpect = Ok,
+        suppress = true
+      )
+    }
+
+    "Fail when a pet ID is not passed when uploading images" in {
+      val imageDataStream = getClass.getResourceAsStream("/bear.jpg")
+      val imageByte = IOUtils.toByteArray(imageDataStream)
+      val imageData: Buf = Await.result(Reader.readAll(Reader.fromStream(imageDataStream)))
+      val req: HttpRequest = RequestBuilder()
+          .url("http://localhost:8888/pet/chocolate/uploadImage")
+          .add(FileElement("file", ChannelBuffers.wrappedBuffer(imageByte)))
+          .buildFormPost(true)
+      server.httpRequest(
+        request = Request(req),
+        andExpect = NotFound,
+        suppress = true
+      )
+    }
+
+    "Fail when attempting to upload a nonexistent image to a pet" in {
+      val req: HttpRequest = RequestBuilder()
+          .url("http://localhost:8888/pet/2/uploadImage")
+          .build(Method.Post, None)
+      server.httpRequest(
+        request = Request(req),
+        andExpect = NotFound,
         suppress = true
       )
     }

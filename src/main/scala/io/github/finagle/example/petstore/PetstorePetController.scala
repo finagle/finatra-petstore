@@ -68,10 +68,11 @@ class PetstorePetController @Inject()(petstoreDb: PetstoreDb) extends Controller
   }
 
   post("/pet/:id/uploadImage") { request: Request =>
-    val id: Long = request.params.getLongOrElse("id", throw InvalidInput("Must give ID of pet to upload image to!"))
+    val id: Long = request.params.getLongOrElse("id", 0)
     val imageItem: MultipartItem = RequestUtils.multiParams(request)
         .getOrElse("file", throw InvalidInput("Must pass in an image!"))
-    petstoreDb.addImage(id, imageItem.data)
+    if ((id == 0 && request.getParam("id").equals("0")) || (id != 0)) petstoreDb.addImage(id, imageItem.data)
+    else throw InvalidInput("Must give a valid Long type ID of the pet to upload image to!")
   }
 
   put("/pet") { pet: Pet =>
